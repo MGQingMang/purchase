@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>大额存单产品购买系统</title>
+        <script src="https://unpkg.com/vue@next"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <style>
+
+        </style>
+    </head>
+    <body>
+        <h1>大额存单产品购买系统</h1>
+        <div id="app">
+            <!--未登录-->
+            <p v-show="showLoginTable">
+                客户id：<input type="text" id="customerIdInput">
+            </p>
+            <p v-show="showLoginTable">
+                密码：<input type="password" id="passwordInput">
+            </p>
+            <p v-show="showLoginTable">
+                <button @click="customerLogin">登录</button>
+            </p>
+
+            <!--已登录-->
+            <p v-show="showFunctionTable">
+                当前登录用户： {{ customerId }}
+            </p>
+            <p v-show="showFunctionTable">
+                <button @click="customerLogout">退出登录</button>
+            </p>
+            <p v-show="showFunctionTable">
+                <button @click="listProducts">查询大额存单产品</button>
+                <button @click="listMyPurchases">查询本人的产品购买记录清单</button>
+            </p>
+
+            <!--查询大额存单产品 listProducts-->
+            <!--<p><button @click="listProducts">查询大额存单产品</button></p>-->
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showListProductsTable">
+                <tr align="center">
+                    <th>大额存单产品</td>
+                </tr>
+            </table>    
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showListProductsTable">
+                <tr align="center">
+                    <!--<th width="10%">产品id</th>-->
+                    <th width="10%">产品名称</th>
+                    <th width="10%">产品总金额（元）</th>
+                    <th width="10%">单次可购买金额下限（元）</th>
+                    <th width="10%">每人可购买总金额上限（元）</th>
+                    <th width="10%">开始售卖日期</th>
+                    <th width="10%">售卖截止日期</th>
+                    <th width="10%">年化利率（%）</th>
+                    <th width="10%">产品当前剩余可购买金额（元）</th>
+                    <th width="8%"></th>
+                </tr>
+                <tr v-for="row in listProductsRecv" align="center">
+                    <!--<td width="10%">{{row.productId}}</td>-->
+                    <td width="10%">{{row.productName}}</td>
+                    <td width="10%">{{row.totalAmount}}</td>
+                    <td width="10%">{{row.amountLowerLimit}}</td>
+                    <td width="10%">{{row.amountUpperLimit}}</td>
+                    <td width="10%">{{row.startSellDate}}</td>
+                    <td width="10%">{{row.stopSellDate}}</td>
+                    <td width="10%">{{row.yearInterestRate}}</td>
+                    <td width="10%">{{row.amountLeft}}</td>
+                    <td width="8%"><button @click="chooseToPurchase(row)">购买</button></td>
+                </tr>
+            </table>
+
+            <!--购买产品 purchaseProduct-->
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showPurchaseTable">
+                <tr align="center">
+                    <th>购买产品</td>
+                </tr>
+            </table> 
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showPurchaseTable">
+                <tr align="center">
+                    <!--<th width="10%">产品id</th>-->
+                    <th width="10%">产品名称</th>
+                    <th width="10%">产品总金额（元）</th>
+                    <th width="10%">单次可购买金额下限（元）</th>
+                    <th width="10%">每人可购买总金额上限（元）</th>
+                    <th width="10%">开始售卖日期</th>
+                    <th width="10%">售卖截止日期</th>
+                    <th width="10%">年化利率（%）</th>
+                    <th width="10%">产品当前剩余可购买金额（元）</th>
+                    <th width="8%"></th>
+                </tr>
+                <tr align="center">
+                    <!--<td width="10%">{{row.productId}}</td>-->
+                    <td width="10%">{{chooseProductName}}</td>
+                    <td width="10%">{{chooseTotalAmount}}</td>
+                    <td width="10%">{{chooseAmountLowerLimit}}</td>
+                    <td width="10%">{{chooseAmountUpperLimit}}</td>
+                    <td width="10%">{{chooseStartSellDate}}</td>
+                    <td width="10%">{{chooseStopSellDate}}</td>
+                    <td width="10%">{{chooseYearInterestRate}}</td>
+                    <td width="10%">{{chooseAmountLeft}}</td>
+                </tr>
+            </table>
+            <p v-show="showPurchaseTable">
+                购买金额：
+                <input type="number" id="purchaseAmountInput">
+                <button @click="purchaseProduct">确认购买</button>
+            </p>
+
+            <!--查询用户购买记录-->
+            <!--<p><button @click="listMyPurchases">查询本人的产品购买记录清单</button></p>-->
+            <table width="60%" border="1" cellspacing="1" align="center" v-show="showListMyPurchasesTable">
+                <tr align="center">
+                    <th>大额存单产品购买记录</td>
+                </tr>
+            </table>    
+            <table width="60%" border="1" cellspacing="1" align="center" v-show="showListMyPurchasesTable">
+                <tr align="center">
+                    <!--<th width="10%">产品id</th>-->
+                    <th width="20%">产品名称</th>
+                    <th width="20%">购买时间</th>
+                    <th width="20%">购买金额（元）</th>
+                </tr>
+                <tr v-for="row in listMyPurchasesRecv" align="center">
+                    <!--<td width="20%">{{row.productId}}</td>-->
+                    <td width="20%">{{row.productName}}</td>
+                    <td width="20%">{{row.purchaseTime}}</td>
+                    <td width="20%">{{row.purchaseAmount}}</td>
+                </tr>
+            </table>
+
+            <p v-show="showInfo">info: {{ info }}</p>
+            
+        </div>
+        <script>
+        const app = {
+            data() {
+                return {
+                    //debug http应答信息 
+                    info: {}, 
+                    showInfo: false,
+
+                    //用户
+                    customerId: {},
+                    showLoginTable: true,
+                    showFunctionTable: false,
+
+                    //http请求的目的URL
+                    listProductsUrl: "http://127.0.0.1:8080/customer/listProducts",
+                    purchaseProductUrl: "http://127.0.0.1:8080/customer/purchaseProduct",
+                    listMyPurchasesUrl: "http://127.0.0.1:8080/customer/listMyPurchases",
+                    customerLoginUrl: "http://127.0.0.1:8080/customer/login",
+                
+                    //查询大额存单产品
+                    listProductsRecv: {}, 
+                    showListProductsTable: false,
+
+                    //购买产品
+                    showPurchaseTable: false,
+                    chooseProductId: {},
+                    chooseProductName: {},
+                    chooseTotalAmount: {},
+                    chooseAmountLowerLimit: {},
+                    chooseAmountUpperLimit: {},
+                    chooseStartSellDate: {},
+                    chooseStopSellDate: {},
+                    chooseYearInterestRate: {},
+                    chooseAmountLeft: {},
+                    purchaseAmount:{},
+
+                    //查询此用户购买的产品
+                    listMyPurchasesRecv: {},
+                    showListMyPurchasesTable: false,
+                
+                }
+            },
+            
+            methods:{
+                postdata(){
+                    axios
+                    .post(this.test1Url, "")
+                    .then(response => {
+                        this.info = response.data;
+                        this.list = response.data.data;
+
+                    })
+                    .catch(function (error) { // 请求失败处理
+                        console.log(error);
+                    });
+                    this.time = new Date();
+                }, 
+                echodata(){
+                    this.echoinfo = document.getElementById("myinput").value;
+                }, 
+                choose(btnid){
+                    this.chooseId = btnid;
+                },
+
+                //发送查询大额存单产品的post请求
+                listProducts(){
+                    axios
+                    .post(this.listProductsUrl, "")
+                    .then(response => {
+                        this.info = response.data;
+                        this.listProductsRecv = response.data.data;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                    this.showListProductsTable = true;
+                    this.showPurchaseTable = false;
+                    this.showListMyPurchasesTable = false;
+                }, 
+                //切换到选定产品的购买界面
+                chooseToPurchase(chooseRow){
+                    this.showListProductsTable = false;
+                    this.showPurchaseTable = true;
+                    this.showListMyPurchasesTable = false;
+                    this.chooseProductId = chooseRow.productId;
+                    this.chooseProductName = chooseRow.productName;
+                    this.chooseTotalAmount = chooseRow.totalAmount;
+                    this.chooseAmountLowerLimit = chooseRow.amountLowerLimit;
+                    this.chooseAmountUpperLimit = chooseRow.amountUpperLimit;
+                    this.chooseStartSellDate = chooseRow.startSellDate;
+                    this.chooseStopSellDate = chooseRow.stopSellDate;
+                    this.chooseYearInterestRate = chooseRow.yearInterestRate;
+                    this.chooseAmountLeft = chooseRow.amountLeft;
+                    //this.purchaseAmount = document.getElementById("purchaseAmountInput");
+                },
+                purchaseProduct(){
+                    var msgSend = {};
+                    msgSend.customerId = this.customerId;
+                    msgSend.productId = this.chooseProductId;
+                    msgSend.purchaseAmount = document.getElementById("purchaseAmountInput").value;
+                    axios
+                    .post(this.purchaseProductUrl, msgSend)
+                    .then(response => {
+                        this.info = response.data;
+                        alert(this.info.message);
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                }, 
+                listMyPurchases(){
+                    this.showListProductsTable = false;
+                    this.showPurchaseTable = false;
+                    this.showListMyPurchasesTable = true;
+                    var msgSend = {};
+                    msgSend.customerId = this.customerId;
+                    axios
+                    .post(this.listMyPurchasesUrl, msgSend)
+                    .then(response => {
+                        this.info = response.data;
+                        this.listMyPurchasesRecv = response.data.data;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                },
+                customerLogin(){
+                    var msgSend = {};
+                    msgSend.customerId = document.getElementById("customerIdInput").value;
+                    msgSend.password = document.getElementById("passwordInput").value;
+                    axios
+                    .post(this.customerLoginUrl, msgSend)
+                    .then(response => {
+                        this.info = response.data;
+                        alert(response.data.message);
+                        if(response.data.status == "S"){
+                            this.showLoginTable = false;
+                            this.showFunctionTable = true;
+                            this.customerId = document.getElementById("customerIdInput").value;
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                },
+                customerLogout(){
+                    this.customerId = {};
+                    this.showLoginTable = true;
+                    this.showFunctionTable = false;
+                    this.showListProductsTable = false;
+                    this.showPurchaseTable = false;
+                    this.showListMyPurchasesTable = false;
+                }
+            },
+            mounted () {
+
+            }
+        }
+        Vue.createApp(app).mount('#app');
+        </script>
+    </body>
+</html>
