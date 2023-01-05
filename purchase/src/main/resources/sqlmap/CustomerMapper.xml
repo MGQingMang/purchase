@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.purchase.sqlmap.CustomerMapper">
+    <resultMap id="TestResultMap" type="com.example.purchase.entity.Customer">
+        <id column="CUSTOMER_ID" jdbcType="VARCHAR" property="customerId"></id>
+        <result column="CUSTOMER_NAME" jdbcType="VARCHAR" property="customerName"></result>
+    </resultMap>
+    <select id="test" resultMap="TestResultMap">
+        select CUSTOMER_ID, CUSTOMER_NAME
+        from CUSTOMER
+        where CUSTOMER_ID = '000001'
+    </select>
+    <select id="test1" resultMap="TestResultMap">
+        select CUSTOMER_ID, CUSTOMER_NAME
+        from CUSTOMER
+    </select>
+
+    <resultMap id="ProductResultMap" type="com.example.purchase.entity.Product">
+        <id column="PRODUCT_ID" jdbcType="VARCHAR" property="productId"></id>
+        <result column="PRODUCT_NAME" jdbcType="VARCHAR" property="productName"></result>
+        <result column="TOTAL_AMOUNT" jdbcType="NUMERIC" property="totalAmount"></result>
+        <result column="AMOUNT_LOWER_LIMIT" jdbcType="NUMERIC" property="amountLowerLimit"></result>
+        <result column="AMOUNT_UPPER_LIMIT" jdbcType="NUMERIC" property="amountUpperLimit"></result>
+        <result column="START_SELL_DATE" jdbcType="VARCHAR" property="startSellDate"></result>
+        <result column="STOP_SELL_DATE" jdbcType="VARCHAR" property="stopSellDate"></result><result column="CUSTOMER_NAME" jdbcType="VARCHAR" property="customerName"></result>
+        <result column="YEAR_INTEREST_RATE" jdbcType="NUMERIC" property="yearInterestRate"></result>
+        <result column="AMOUNT_LEFT" jdbcType="NUMERIC" property="amountLeft"></result>
+    </resultMap>
+    <select id="listProducts" resultMap="ProductResultMap">
+        select PRODUCT_ID, PRODUCT_NAME, TOTAL_AMOUNT, AMOUNT_LOWER_LIMIT, AMOUNT_UPPER_LIMIT,
+        START_SELL_DATE, STOP_SELL_DATE, YEAR_INTEREST_RATE, AMOUNT_LEFT
+        from PRODUCT
+        order by PRODUCT_ID
+    </select>
+    <select id="getProduct" resultMap="ProductResultMap">
+        select PRODUCT_ID, PRODUCT_NAME, TOTAL_AMOUNT, AMOUNT_LOWER_LIMIT, AMOUNT_UPPER_LIMIT,
+        START_SELL_DATE, STOP_SELL_DATE, YEAR_INTEREST_RATE, AMOUNT_LEFT
+        from PRODUCT
+        where PRODUCT_ID = #{productId, jdbcType=VARCHAR}
+    </select>
+
+    <resultMap id="PurchaseResultMap" type="com.example.purchase.entity.Purchase">
+        <id column="CUSTOMER_ID" jdbcType="VARCHAR" property="customerId"></id>
+        <id column="PRODUCT_ID" jdbcType="VARCHAR" property="productId"></id>
+        <id column="PURCHASE_TIME" jdbcType="VARCHAR" property="purchaseTime"></id>
+        <result column="PURCHASE_AMOUNT" jdbcType="NUMERIC" property="purchaseAmount"></result>
+    </resultMap>
+
+    <resultMap id="PurchaseAmountResultMap" type="com.example.purchase.entity.Purchase">
+        <result column="SUM(PURCHASE_AMOUNT)" jdbcType="NUMERIC" property="purchaseAmount"></result>
+    </resultMap>
+    <select id="getCustomerPurchaseTotalAmountByProduct" resultMap="PurchaseAmountResultMap">
+        select sum(PURCHASE_AMOUNT)
+        from PURCHASE
+        where CUSTOMER_ID = #{customerId, jdbcType=VARCHAR} and PRODUCT_ID = #{productId, jdbcType=VARCHAR}
+    </select>
+
+    <update id="updateProductAmountLeft" parameterType="com.example.purchase.entity.Purchase">
+        update PRODUCT
+        set AMOUNT_LEFT = AMOUNT_LEFT - #{purchaseAmount, jdbcType=NUMERIC}
+        where PRODUCT_ID = #{productId, jdbcType=VARCHAR}
+    </update>
+
+    <insert id="insertPurchase" parameterType="com.example.purchase.entity.Purchase">
+        insert into PURCHASE (CUSTOMER_ID, PRODUCT_ID, PURCHASE_TIME, PURCHASE_AMOUNT)
+        values (#{customerId, jdbcType=VARCHAR}, #{productId, jdbcType=VARCHAR}, #{purchaseTime, jdbcType=VARCHAR},
+        #{purchaseAmount, jdbcType=NUMERIC})
+    </insert>
+
+    <resultMap id="listPurchasesResultMap" type="com.example.purchase.entity.PurchaseProduct">
+        <id column="PRODUCT_ID" jdbcType="VARCHAR" property="productId"></id>
+        <id column="PURCHASE_TIME" jdbcType="VARCHAR" property="purchaseTime"></id>
+        <result column="PRODUCT_NAME" jdbcType="VARCHAR" property="productName"></result>
+        <result column="PURCHASE_AMOUNT" jdbcType="NUMERIC" property="purchaseAmount"></result>
+    </resultMap>
+    <select id="listPurchasesByCustomerId" resultMap="listPurchasesResultMap" parameterType="com.example.purchase.entity.Customer">
+        select PRODUCT_ID, PRODUCT_NAME, PURCHASE_TIME, PURCHASE_AMOUNT
+        from PURCHASE natural join PRODUCT
+        where CUSTOMER_ID = #{customerId, jdbcType=VARCHAR}
+        order by PRODUCT_ID, PURCHASE_TIME desc
+    </select>
+
+    <resultMap id="loginResultMap" type="com.example.purchase.entity.Customer">
+        <id column="CUSTOMER_ID" jdbcType="VARCHAR" property="customerId"></id>
+        <result column="PASSWORD" jdbcType="VARCHAR" property="password"></result>
+    </resultMap>
+    <select id="login" resultMap="loginResultMap" parameterType="com.example.purchase.entity.Customer">
+        select CUSTOMER_ID
+        from CUSTOMER
+        where CUSTOMER_ID = #{customerId, jdbcType=VARCHAR} and  PASSWORD = #{password, jdbcType=VARCHAR}
+    </select>
+
+</mapper>

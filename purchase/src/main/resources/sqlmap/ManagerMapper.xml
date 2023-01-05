@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.purchase.sqlmap.ManagerMapper">
+
+    <resultMap id="ProductResultMap" type="com.example.purchase.entity.Product">
+        <id column="PRODUCT_ID" jdbcType="VARCHAR" property="productId"></id>
+        <result column="PRODUCT_NAME" jdbcType="VARCHAR" property="productName"></result>
+        <result column="TOTAL_AMOUNT" jdbcType="NUMERIC" property="totalAmount"></result>
+        <result column="AMOUNT_LOWER_LIMIT" jdbcType="NUMERIC" property="amountLowerLimit"></result>
+        <result column="AMOUNT_UPPER_LIMIT" jdbcType="NUMERIC" property="amountUpperLimit"></result>
+        <result column="START_SELL_DATE" jdbcType="VARCHAR" property="startSellDate"></result>
+        <result column="STOP_SELL_DATE" jdbcType="VARCHAR" property="stopSellDate"></result><result column="CUSTOMER_NAME" jdbcType="VARCHAR" property="customerName"></result>
+        <result column="YEAR_INTEREST_RATE" jdbcType="NUMERIC" property="yearInterestRate"></result>
+        <result column="AMOUNT_LEFT" jdbcType="NUMERIC" property="amountLeft"></result>
+    </resultMap>
+    <select id="listProducts" resultMap="ProductResultMap">
+        select PRODUCT_ID, PRODUCT_NAME, TOTAL_AMOUNT, AMOUNT_LOWER_LIMIT, AMOUNT_UPPER_LIMIT,
+        START_SELL_DATE, STOP_SELL_DATE, YEAR_INTEREST_RATE, AMOUNT_LEFT
+        from PRODUCT
+        order by PRODUCT_ID
+    </select>
+    <select id="getProduct" resultMap="ProductResultMap">
+        select PRODUCT_ID, PRODUCT_NAME, TOTAL_AMOUNT, AMOUNT_LOWER_LIMIT, AMOUNT_UPPER_LIMIT,
+        START_SELL_DATE, STOP_SELL_DATE, YEAR_INTEREST_RATE, AMOUNT_LEFT
+        from PRODUCT
+        where PRODUCT_ID = #{productId, jdbcType=VARCHAR}
+    </select>
+
+    <insert id="insertProduct" parameterType="com.example.purchase.entity.Product">
+        insert into PRODUCT (PRODUCT_ID, PRODUCT_NAME, TOTAL_AMOUNT, AMOUNT_LOWER_LIMIT, AMOUNT_UPPER_LIMIT,
+        START_SELL_DATE, STOP_SELL_DATE, YEAR_INTEREST_RATE, AMOUNT_LEFT)
+        values (#{productId, jdbcType=VARCHAR}, #{productName, jdbcType=VARCHAR}, #{totalAmount, jdbcType=NUMERIC},
+        #{amountLowerLimit, jdbcType=NUMERIC}, #{amountUpperLimit, jdbcType=NUMERIC}, #{startSellDate, jdbcType=VARCHAR},
+        #{stopSellDate, jdbcType=VARCHAR}, #{yearInterestRate, jdbcType=NUMERIC}, #{amountLeft, jdbcType=NUMERIC})
+    </insert>
+
+    <delete id="deleteProduct" parameterType="com.example.purchase.entity.Product">
+        delete from PRODUCT
+        where PRODUCT_ID = #{productId, jdbcType=VARCHAR}
+    </delete>
+
+    <update id="updateProduct" parameterType="com.example.purchase.entity.Product">
+        update PRODUCT
+        set PRODUCT_NAME = #{productName, jdbcType=VARCHAR}, TOTAL_AMOUNT = #{totalAmount, jdbcType=NUMERIC},
+        AMOUNT_LOWER_LIMIT = #{amountLowerLimit, jdbcType=NUMERIC}, AMOUNT_UPPER_LIMIT = #{amountUpperLimit, jdbcType=NUMERIC},
+        START_SELL_DATE = #{startSellDate, jdbcType=VARCHAR}, STOP_SELL_DATE = #{stopSellDate, jdbcType=VARCHAR},
+        YEAR_INTEREST_RATE = #{yearInterestRate, jdbcType=NUMERIC}, AMOUNT_LEFT = #{amountLeft, jdbcType=NUMERIC}
+        where PRODUCT_ID = #{productId, jdbcType=VARCHAR}
+    </update>
+
+    <resultMap id="CustomerResultMap" type="com.example.purchase.entity.Customer">
+        <id column="CUSTOMER_ID" jdbcType="VARCHAR" property="customerId"></id>
+        <result column="CUSTOMER_NAME" jdbcType="VARCHAR" property="customerName"></result>
+        <result column="CUSTOMER_GENDER" jdbcType="VARCHAR" property="customerGender"></result>
+        <result column="CUSTOMER_AGE" jdbcType="NUMERIC" property="customerAge"></result>
+    </resultMap>
+    <select id="listCustomers" resultMap="CustomerResultMap">
+        select CUSTOMER_ID, CUSTOMER_NAME, CUSTOMER_GENDER, CUSTOMER_AGE
+        from CUSTOMER
+        order by CUSTOMER_ID
+    </select>
+
+    <select id="getCustomer" resultMap="CustomerResultMap">
+        select CUSTOMER_ID, CUSTOMER_NAME, CUSTOMER_GENDER, CUSTOMER_AGE
+        from CUSTOMER
+        where CUSTOMER_ID = #{customerId, jdbcType=VARCHAR}
+    </select>
+
+    <insert id="insertCustomer" parameterType="com.example.purchase.entity.Customer">
+        insert into CUSTOMER (CUSTOMER_ID, CUSTOMER_NAME, CUSTOMER_GENDER, CUSTOMER_AGE)
+        values (#{customerId, jdbcType=VARCHAR}, #{customerName, jdbcType=VARCHAR},
+        #{customerGender, jdbcType=VARCHAR}, #{customerAge, jdbcType=NUMERIC})
+    </insert>
+
+    <delete id="deleteCustomer" parameterType="com.example.purchase.entity.Customer">
+        delete from CUSTOMER
+        where CUSTOMER_ID = #{customerId, jdbcType=VARCHAR}
+    </delete>
+
+    <update id="updateCustomer" parameterType="com.example.purchase.entity.Customer">
+        update CUSTOMER
+        set CUSTOMER_NAME = #{customerName, jdbcType=VARCHAR}, CUSTOMER_GENDER = #{customerGender, jdbcType=VARCHAR},
+        CUSTOMER_AGE = #{customerAge, jdbcType=NUMERIC}
+        where CUSTOMER_ID = #{customerId, jdbcType=VARCHAR}
+    </update>
+
+</mapper>

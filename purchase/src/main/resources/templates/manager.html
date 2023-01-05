@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>管理员系统</title>
+        <script src="https://unpkg.com/vue@next"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <style>
+
+        </style>
+    </head>
+    <body>
+        <h1>大额存单产品管理系统</h1>
+        <div id="app">
+            <p>
+                <button @click="listProducts">查询大额存单产品</button>
+                <button @click="chooseToInsertProduct">新增产品信息</button>
+                <button @click="listCustomers">查询客户信息</button>
+                <button @click="chooseToInsertCustomer">新增客户信息</button>
+            </p>
+
+            <!--大额存单产品-查-->
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showListProductsTable">
+                <tr align="center">
+                    <th>大额存单产品</td>
+                </tr>
+            </table>    
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showListProductsTable">
+                <tr align="center">
+                    <th width="10%">产品id</th>
+                    <th width="10%">产品名称</th>
+                    <th width="10%">产品总金额（元）</th>
+                    <th width="10%">单次可购买金额下限（元）</th>
+                    <th width="10%">每人可购买总金额上限（元）</th>
+                    <th width="10%">开始售卖日期</th>
+                    <th width="10%">售卖截止日期</th>
+                    <th width="10%">年化利率（%）</th>
+                    <th width="10%">产品当前剩余可购买金额（元）</th>
+                </tr>
+                <tr v-for="row in listProductsRecv" align="center">
+                    <td width="10%">{{row.productId}}</td>
+                    <td width="10%">{{row.productName}}</td>
+                    <td width="10%">{{row.totalAmount}}</td>
+                    <td width="10%">{{row.amountLowerLimit}}</td>
+                    <td width="10%">{{row.amountUpperLimit}}</td>
+                    <td width="10%">{{row.startSellDate}}</td>
+                    <td width="10%">{{row.stopSellDate}}</td>
+                    <td width="10%">{{row.yearInterestRate}}</td>
+                    <td width="10%">{{row.amountLeft}}</td>
+                    <td width="4%"><button @click="chooseToDeleteProduct(row)">删除</button></td>
+                    <td width="4%"><button @click="chooseToUpdateProduct(row)">更改</button></td>
+                </tr>
+            </table>
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showListProductsTable">
+                <tr align="right">
+                    <td ><button @click="chooseToInsertProduct">新增产品信息</button></td>
+                </tr>
+            </table>
+
+            <!--大额存单产品-删-->
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showDeleteProductTable">
+                <tr align="center">
+                    <th>删除产品</td>
+                </tr>
+            </table>    
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showDeleteProductTable">
+                <tr align="center">
+                    <th width="10%">产品id</th>
+                    <th width="10%">产品名称</th>
+                    <th width="10%">产品总金额（元）</th>
+                    <th width="10%">单次可购买金额下限（元）</th>
+                    <th width="10%">每人可购买总金额上限（元）</th>
+                    <th width="10%">开始售卖日期</th>
+                    <th width="10%">售卖截止日期</th>
+                    <th width="10%">年化利率（%）</th>
+                    <th width="10%">产品当前剩余可购买金额（元）</th>
+                </tr>
+                <tr align="center">
+                    <td width="10%">{{chooseProductId}}</td>
+                    <td width="10%">{{chooseProductName}}</td>
+                    <td width="10%">{{chooseTotalAmount}}</td>
+                    <td width="10%">{{chooseAmountLowerLimit}}</td>
+                    <td width="10%">{{chooseAmountUpperLimit}}</td>
+                    <td width="10%">{{chooseStartSellDate}}</td>
+                    <td width="10%">{{chooseStopSellDate}}</td>
+                    <td width="10%">{{chooseYearInterestRate}}</td>
+                    <td width="10%">{{chooseAmountLeft}}</td>
+                    <td width="8%"><button @click="deleteProduct">确认删除</button></td>
+                </tr>
+            </table>
+
+            <!--大额存单产品-改-->
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showUpdateProductTable">
+                <tr align="center">
+                    <th>更改产品信息</td>
+                </tr>
+            </table>    
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showUpdateProductTable">
+                <tr align="center">
+                    <th width="10%">产品id</th>
+                    <th width="10%">产品名称</th>
+                    <th width="10%">产品总金额（元）</th>
+                    <th width="10%">单次可购买金额下限（元）</th>
+                    <th width="10%">每人可购买总金额上限（元）</th>
+                    <th width="10%">开始售卖日期</th>
+                    <th width="10%">售卖截止日期</th>
+                    <th width="10%">年化利率（%）</th>
+                    <th width="10%">产品当前剩余可购买金额（元）</th>
+                </tr>
+                <tr align="center">
+                    <td width="10%">{{chooseProductId}}</td>
+                    <td width="10%"><input type="text" id="productNameInputUpdate"></td>
+                    <td width="10%"><input type="number" id="totalAmountInputUpdate"></td>
+                    <td width="10%"><input type="number" id="amountLowerLimitInputUpdate"></td>
+                    <td width="10%"><input type="number" id="amountUpperLimitInputUpdate"></td>
+                    <td width="10%"><input type="text" id="startSellDateInputUpdate"></td>
+                    <td width="10%"><input type="text" id="stopSellDateInputUpdate"></td>
+                    <td width="10%"><input type="number" id="yearInterestRateInputUpdate"></td>
+                    <td width="10%"><input type="number" id="amountLeftInputUpdate"></td>
+                    <td width="8%"><button @click="updateProduct">确认更改</button></td>
+                </tr>
+            </table>
+
+            <!--大额存单产品-增-->
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showInsertProductTable">
+                <tr align="center">
+                    <th>新增产品信息</td>
+                </tr>
+            </table>    
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showInsertProductTable">
+                <tr align="center">
+                    <th width="10%">产品id</th>
+                    <th width="10%">产品名称</th>
+                    <th width="10%">产品总金额（元）</th>
+                    <th width="10%">单次可购买金额下限（元）</th>
+                    <th width="10%">每人可购买总金额上限（元）</th>
+                    <th width="10%">开始售卖日期</th>
+                    <th width="10%">售卖截止日期</th>
+                    <th width="10%">年化利率（%）</th>
+                    <!--<th width="10%">产品当前剩余可购买金额（元）</th>-->
+                </tr>
+                <tr align="center">
+                    <td width="10%"><input type="text" id="productIdInputInsert"></td>
+                    <td width="10%"><input type="text" id="productNameInputInsert"></td>
+                    <td width="10%"><input type="number" id="totalAmountInputInsert"></td>
+                    <td width="10%"><input type="number" id="amountLowerLimitInputInsert"></td>
+                    <td width="10%"><input type="number" id="amountUpperLimitInputInsert"></td>
+                    <td width="10%"><input type="text" id="startSellDateInputInsert"></td>
+                    <td width="10%"><input type="text" id="stopSellDateInputInsert"></td>
+                    <td width="10%"><input type="number" id="yearInterestRateInputInsert"></td>
+                    <!--<td width="10%"><input type="number" id="amountLeftInputInsert"></td>-->
+                    <td width="8%"><button @click="insertProduct">确认新增</button></td>
+                </tr>
+            </table>
+
+            <!--客户-查-->
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showListCustomersTable">
+                <tr align="center">
+                    <th>客户</td>
+                </tr>
+            </table>    
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showListCustomersTable">
+                <tr align="center">
+                    <th width="10%">客户id</th>
+                    <th width="10%">客户姓名</th>
+                    <th width="10%">客户性别（01-男，02-女）</th>
+                    <th width="10%">客户年龄</th>
+
+                </tr>
+                <tr v-for="row in listCustomersRecv" align="center">
+                    <td width="10%">{{row.customerId}}</td>
+                    <td width="10%">{{row.customerName}}</td>
+                    <td width="10%">{{row.customerGender}}</td>
+                    <td width="10%">{{row.customerAge}}</td>
+
+                    <td width="4%"><button @click="chooseToDeleteCustomer(row)">删除</button></td>
+                    <td width="4%"><button @click="chooseToUpdateCustomer(row)">更改</button></td>
+                </tr>
+            </table>
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showListCustomersTable">
+                <tr align="right">
+                    <td ><button @click="chooseToInsertCustomer">新增客户信息</button></td>
+                </tr>
+            </table>
+
+            <!--客户-删-->
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showDeleteCustomerTable">
+                <tr align="center">
+                    <th>删除客户</td>
+                </tr>
+            </table>    
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showDeleteCustomerTable">
+                <tr align="center">
+                    <th width="10%">客户id</th>
+                    <th width="10%">客户姓名</th>
+                    <th width="10%">客户性别（01-男，02-女）</th>
+                    <th width="10%">客户年龄</th>
+                </tr>
+                <tr align="center">
+                    <td width="10%">{{chooseCustomerId}}</td>
+                    <td width="10%">{{chooseCustomerName}}</td>
+                    <td width="10%">{{chooseCustomerGender}}</td>
+                    <td width="10%">{{chooseCustomerAge}}</td>
+                    <td width="8%"><button @click="deleteCustomer">确认删除</button></td>
+                </tr>
+            </table>
+
+            <!--客户-改-->
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showUpdateCustomerTable">
+                <tr align="center">
+                    <th>更改客户信息</td>
+                </tr>
+            </table>    
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showUpdateCustomerTable">
+                <tr align="center">
+                    <th width="10%">客户id</th>
+                    <th width="10%">客户姓名</th>
+                    <th width="10%">客户性别（01-男，02-女）</th>
+                    <th width="10%">客户年龄</th>
+                </tr>
+                <tr align="center">
+                    <td width="10%">{{chooseCustomerId}}</td>
+                    <td width="10%"><input type="text" id="customerNameInputUpdate"></td>
+                    <td width="10%"><input type="text" id="customerGenderInputUpdate"></td>
+                    <td width="10%"><input type="number" id="customerAgeInputUpdate"></td>
+                    <td width="8%"><button @click="updateCustomer">确认更改</button></td>
+                </tr>
+            </table>
+
+            <!--客户-增-->
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showInsertCustomerTable">
+                <tr align="center">
+                    <th>新增客户信息</td>
+                </tr>
+            </table>    
+            <table width="100%" border="1" cellspacing="1" align="center" v-show="showInsertCustomerTable">
+                <tr align="center">
+                    <th width="10%">客户id</th>
+                    <th width="10%">客户姓名</th>
+                    <th width="10%">客户性别（01-男，02-女）</th>
+                    <th width="10%">客户年龄</th>
+                </tr>
+                <tr align="center">
+                    <td width="10%"><input type="text" id="customerIdInputInsert"></td>
+                    <td width="10%"><input type="text" id="customerNameInputInsert"></td>
+                    <td width="10%"><input type="text" id="customerGenderInputInsert"></td>
+                    <td width="10%"><input type="number" id="customerAgeInputInsert"></td>
+                    <td width="8%"><button @click="insertCustomer">确认新增</button></td>
+                </tr>
+            </table>
+
+            <p v-show="showInfo">info: {{ info }}</p>
+            
+        </div>
+        <script>
+        const app = {
+            data() {
+                return {
+                    //debug http应答信息 
+                    info: {},
+                    showInfo: false,
+
+                    //查询产品
+                    listProductsUrl: "http://127.0.0.1:8080/manager/product/listProducts",
+                    listProductsRecv: {},
+                    showListProductsTable: false,
+
+                    //删除产品
+                    deleteProductUrl: "http://127.0.0.1:8080/manager/product/deleteProduct",
+                    chooseProductId: {},
+                    chooseProductName: {},
+                    chooseTotalAmount: {},
+                    chooseAmountLowerLimit: {},
+                    chooseAmountUpperLimit: {},
+                    chooseStartSellDate: {},
+                    chooseStopSellDate: {},
+                    chooseYearInterestRate: {},
+                    chooseAmountLeft: {},
+                    showDeleteProductTable: false,
+                
+                    //更新产品
+                    updateProductUrl: "http://127.0.0.1:8080/manager/product/updateProduct",
+                    showUpdateProductTable: false,
+
+                    //新增产品
+                    insertProductUrl: "http://127.0.0.1:8080/manager/product/insertProduct",
+                    showInsertProductTable: false,
+
+                    //查询客户
+                    listCustomersUrl: "http://127.0.0.1:8080/manager/customer/listCustomers",
+                    listCustomersRecv: {},
+                    showListCustomersTable: false,
+
+                    //删除客户
+                    deleteCustomerUrl: "http://127.0.0.1:8080/manager/customer/deleteCustomer",
+                    chooseCustomerId: {},
+                    chooseCustomerName: {},
+                    chooseCustomerGender: {},
+                    chooseCustomerAge: {},
+                    showDeleteCustomerTable: false,
+                
+                    //更新客户
+                    updateCustomerUrl: "http://127.0.0.1:8080/manager/customer/updateCustomer",
+                    showUpdateCustomerTable: false,
+
+                    //新增客户
+                    insertCustomerUrl: "http://127.0.0.1:8080/manager/customer/insertCustomer",
+                    showInsertCustomerTable: false,
+                }
+            },
+            
+            methods:{
+                listProducts() {
+                    axios
+                    .post(this.listProductsUrl, "")
+                    .then(response => {
+                        this.info = response.data;
+                        this.listProductsRecv = response.data.data;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                    this.showListProductsTable = true;
+                    this.showDeleteProductTable = false;
+                    this.showUpdateProductTable = false;
+                    this.showInsertProductTable = false;
+                    this.showListCustomersTable = false;
+                    this.showDeleteCustomerTable = false;
+                    this.showUpdateCustomerTable = false;
+                    this.showInsertCustomerTable = false;
+                },
+                chooseToDeleteProduct(chooseRow){
+                    this.showListProductsTable = false;
+                    this.showDeleteProductTable = true;
+                    this.showUpdateProductTable = false;
+                    this.showInsertProductTable = false;
+                    this.showListCustomersTable = false;
+                    this.showDeleteCustomerTable = false;
+                    this.showUpdateCustomerTable = false;
+                    this.showInsertCustomerTable = false;
+                    this.chooseProductId = chooseRow.productId;
+                    this.chooseProductName = chooseRow.productName;
+                    this.chooseTotalAmount = chooseRow.totalAmount;
+                    this.chooseAmountLowerLimit = chooseRow.amountLowerLimit;
+                    this.chooseAmountUpperLimit = chooseRow.amountUpperLimit;
+                    this.chooseStartSellDate = chooseRow.startSellDate;
+                    this.chooseStopSellDate = chooseRow.stopSellDate;
+                    this.chooseYearInterestRate = chooseRow.yearInterestRate;
+                    this.chooseAmountLeft = chooseRow.amountLeft;
+                },
+                chooseToUpdateProduct(chooseRow){
+                    this.showListProductsTable = false;
+                    this.showDeleteProductTable = false;
+                    this.showUpdateProductTable = true;
+                    this.showInsertProductTable = false;
+                    this.showListCustomersTable = false;
+                    this.showDeleteCustomerTable = false;
+                    this.showUpdateCustomerTable = false;
+                    this.showInsertCustomerTable = false;
+                    this.chooseProductId = chooseRow.productId;
+                    document.getElementById("productNameInputUpdate").value = chooseRow.productName;
+                    document.getElementById("totalAmountInputUpdate").value = chooseRow.totalAmount;
+                    document.getElementById("amountLowerLimitInputUpdate").value = chooseRow.amountLowerLimit;
+                    document.getElementById("amountUpperLimitInputUpdate").value = chooseRow.amountUpperLimit;
+                    document.getElementById("startSellDateInputUpdate").value = chooseRow.startSellDate;
+                    document.getElementById("stopSellDateInputUpdate").value = chooseRow.stopSellDate;
+                    document.getElementById("yearInterestRateInputUpdate").value = chooseRow.yearInterestRate;
+                    document.getElementById("amountLeftInputUpdate").value = chooseRow.amountLeft;
+                },
+                deleteProduct(){
+                    var msgSend = {};
+                    msgSend.productId = this.chooseProductId;
+                    axios
+                    .post(this.deleteProductUrl, msgSend)
+                    .then(response => {
+                        this.info = response.data;
+                        alert(this.info.message);
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                    this.showDeleteProductTable = false;
+                },
+                updateProduct(){
+                    var msgSend = {};
+                    msgSend.productId = this.chooseProductId;
+                    msgSend.productName = document.getElementById("productNameInputUpdate").value;
+                    msgSend.totalAmount = document.getElementById("totalAmountInputUpdate").value;
+                    msgSend.amountLowerLimit = document.getElementById("amountLowerLimitInputUpdate").value;
+                    msgSend.amountUpperLimit = document.getElementById("amountUpperLimitInputUpdate").value;
+                    msgSend.startSellDate = document.getElementById("startSellDateInputUpdate").value;
+                    msgSend.stopSellDate = document.getElementById("stopSellDateInputUpdate").value;
+                    msgSend.yearInterestRate = document.getElementById("yearInterestRateInputUpdate").value;
+                    msgSend.amountLeft = document.getElementById("amountLeftInputUpdate").value;
+                    axios
+                    .post(this.updateProductUrl, msgSend)
+                    .then(response => {
+                        this.info = response.data;
+                        alert(this.info.message);
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                    this.showUpdateProductTable = false;
+                },
+                chooseToInsertProduct(){
+                    this.showListProductsTable = false;
+                    this.showDeleteProductTable = false;
+                    this.showUpdateProductTable = false;
+                    this.showInsertProductTable = true;
+                    this.showListCustomersTable = false;
+                    this.showDeleteCustomerTable = false;
+                    this.showUpdateCustomerTable = false;
+                    this.showInsertCustomerTable = false;
+                }, 
+                insertProduct(){
+                    var msgSend = {};
+                    msgSend.productId = document.getElementById("productIdInputInsert").value;
+                    msgSend.productName = document.getElementById("productNameInputInsert").value;
+                    msgSend.totalAmount = document.getElementById("totalAmountInputInsert").value;
+                    msgSend.amountLowerLimit = document.getElementById("amountLowerLimitInputInsert").value;
+                    msgSend.amountUpperLimit = document.getElementById("amountUpperLimitInputInsert").value;
+                    msgSend.startSellDate = document.getElementById("startSellDateInputInsert").value;
+                    msgSend.stopSellDate = document.getElementById("stopSellDateInputInsert").value;
+                    msgSend.yearInterestRate = document.getElementById("yearInterestRateInputInsert").value;
+                    msgSend.amountLeft = document.getElementById("totalAmountInputInsert").value;
+                    axios
+                    .post(this.insertProductUrl, msgSend)
+                    .then(response => {
+                        this.info = response.data;
+                        alert(this.info.message);
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                    this.showInsertProductTable = false;
+                },
+
+                listCustomers(){
+                    axios
+                    .post(this.listCustomersUrl, "")
+                    .then(response => {
+                        this.info = response.data;
+                        this.listCustomersRecv = response.data.data;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                    this.showListProductsTable = false;
+                    this.showDeleteProductTable = false;
+                    this.showUpdateProductTable = false;
+                    this.showInsertProductTable = false;
+                    this.showListCustomersTable = true;
+                    this.showDeleteCustomerTable = false;
+                    this.showUpdateCustomerTable = false;
+                    this.showInsertCustomerTable = false;
+                },
+                chooseToDeleteCustomer(chooseRow){
+                    this.showListProductsTable = false;
+                    this.showDeleteProductTable = false;
+                    this.showUpdateProductTable = false;
+                    this.showInsertProductTable = false;
+                    this.showListCustomersTable = false;
+                    this.showDeleteCustomerTable = true;
+                    this.showUpdateCustomerTable = false;
+                    this.showInsertCustomerTable = false;
+                    this.chooseCustomerId = chooseRow.customerId;
+                    this.chooseCustomerName = chooseRow.customerName;
+                    this.chooseCustomerGender = chooseRow.customerGender;
+                    this.chooseCustomerAge = chooseRow.customerAge;
+                },
+                chooseToUpdateCustomer(chooseRow){
+                    this.showListProductsTable = false;
+                    this.showDeleteProductTable = false;
+                    this.showUpdateProductTable = false;
+                    this.showInsertProductTable = false;
+                    this.showListCustomersTable = false;
+                    this.showDeleteCustomerTable = false;
+                    this.showUpdateCustomerTable = true;
+                    this.showInsertCustomerTable = false;
+                    this.chooseCustomerId = chooseRow.customerId;
+                    document.getElementById("customerNameInputUpdate").value = chooseRow.customerName;
+                    document.getElementById("customerGenderInputUpdate").value = chooseRow.customerGender;
+                    document.getElementById("customerAgeInputUpdate").value = chooseRow.customerAge;
+                },
+                deleteCustomer(){
+                    var msgSend = {};
+                    msgSend.customerId = this.chooseCustomerId;
+                    axios
+                    .post(this.deleteCustomerUrl, msgSend)
+                    .then(response => {
+                        this.info = response.data;
+                        alert(this.info.message);
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                    this.showDeleteCustomerTable = false;
+                },
+                updateCustomer(){
+                    var msgSend = {};
+                    msgSend.customerId = this.chooseCustomerId;
+                    msgSend.customerName = document.getElementById("customerNameInputUpdate").value;
+                    msgSend.customerGender = document.getElementById("customerGenderInputUpdate").value;
+                    msgSend.customerAge = document.getElementById("customerAgeInputUpdate").value;
+                    axios
+                    .post(this.updateCustomerUrl, msgSend)
+                    .then(response => {
+                        this.info = response.data;
+                        alert(this.info.message);
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                    this.showUpdateCustomerTable = false;
+                },
+                chooseToInsertCustomer(){
+                    this.showListProductsTable = false;
+                    this.showDeleteProductTable = false;
+                    this.showUpdateProductTable = false;
+                    this.showInsertProductTable = false;
+                    this.showListCustomersTable = false;
+                    this.showDeleteCustomerTable = false;
+                    this.showUpdateCustomerTable = false;
+                    this.showInsertCustomerTable = true;
+                },
+                insertCustomer(){
+                    var msgSend = {};
+                    msgSend.customerId = document.getElementById("customerIdInputInsert").value;
+                    msgSend.customerName = document.getElementById("customerNameInputInsert").value;
+                    msgSend.customerGender = document.getElementById("customerGenderInputInsert").value;
+                    msgSend.customerAge = document.getElementById("customerAgeInputInsert").value;
+                    axios
+                    .post(this.insertCustomerUrl, msgSend)
+                    .then(response => {
+                        this.info = response.data;
+                        alert(this.info.message);
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+                    this.showInsertCutomerTable = false;
+                }
+            },
+            mounted () {
+
+            }
+        }
+        Vue.createApp(app).mount('#app');
+        </script>
+    </body>
+</html>
